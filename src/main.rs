@@ -12,6 +12,7 @@ fn choose_program() -> Result<(), String> {
         "Choose a program to run:
 
 Chapter 1: A) Hello Window
+           B) Hello Triangle
 
 Type in the chapter number, along with the program letter (e.g. 1A)."
     );
@@ -25,6 +26,7 @@ Type in the chapter number, along with the program letter (e.g. 1A)."
 
     match input.as_str() {
         "1A" => chapter_1::hello_window::run()?,
+        "1B" => chapter_1::hello_triangle::run()?,
         _ => println!("Invalid input {}.", input),
     }
 

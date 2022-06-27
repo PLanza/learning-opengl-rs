@@ -1,5 +1,3 @@
-use glutin;
-
 pub fn run() -> Result<(), String> {
     // Provides a way to retrieve events from the system and
     // from the windows that were registered to the event loop.

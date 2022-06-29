@@ -1,5 +1,4 @@
 mod chapter_1;
-
 use std::io;
 
 fn main() -> Result<(), String> {

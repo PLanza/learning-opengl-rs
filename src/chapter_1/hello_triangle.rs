@@ -1,3 +1,5 @@
+use super::Application;
+
 use gl::types;
 
 // The GLSL shader code
@@ -49,18 +51,18 @@ Type in the number."
     input.pop();
 
     match input.as_str() {
-        "1" => run_basic()?,
-        "2" => run_indexed()?,
-        "3" => run_exercise_1()?,
-        "4" => run_exercise_2()?,
-        "5" => run_exercise_3()?,
+        "1" => run_basic(setup()?)?,
+        "2" => run_indexed(setup()?)?,
+        "3" => run_exercise_1(setup()?)?,
+        "4" => run_exercise_2(setup()?)?,
+        "5" => run_exercise_3(setup()?)?,
         _ => println!("Invalid input {}.", input),
     }
 
     Ok(())
 }
 
-pub fn run_basic() -> Result<(), String> {
+fn setup() -> Result<Application, String> {
     // -------------------- Initialize Context --------------------
 
     let el = glutin::event_loop::EventLoop::new();
@@ -88,6 +90,13 @@ pub fn run_basic() -> Result<(), String> {
 
     gl::load_with(|s| current_context.get_proc_address(s));
 
+    Ok(Application {
+        event_loop: el,
+        context: current_context,
+    })
+}
+
+fn run_basic(app: Application) -> Result<(), String> {
     // -------------------- Setup Vertex Shader -------------------------
 
     let (shader_program, _vao) = unsafe {
@@ -232,14 +241,14 @@ pub fn run_basic() -> Result<(), String> {
 
     // -------------------- Run Event Loop -------------------------
 
-    el.run(move |event, _, control_flow| {
+    app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {
             Event::LoopDestroyed => return (),
             Event::WindowEvent { event, .. } => match event {
-                WindowEvent::Resized(phys_size) => current_context.resize(phys_size),
+                WindowEvent::Resized(phys_size) => app.context.resize(phys_size),
                 WindowEvent::CloseRequested => {
                     // Sends a LoopDestroyed event and stops the event loop
                     *control_flow = glutin::event_loop::ControlFlow::Exit
@@ -268,41 +277,14 @@ pub fn run_basic() -> Result<(), String> {
                 gl::DrawArrays(gl::TRIANGLES, 0, 3);
                 // gl::BindVertexArray(0); // Not necessary for this simple program
 
-                current_context.swap_buffers().unwrap();
+                app.context.swap_buffers().unwrap();
             },
             _ => (),
         }
     });
 }
 
-pub fn run_indexed() -> Result<(), String> {
-    // -------------------- Initialize Context --------------------
-
-    let el = glutin::event_loop::EventLoop::new();
-
-    let cb = glutin::ContextBuilder::new()
-        .with_gl(glutin::GlRequest::Specific(glutin::Api::OpenGl, (3, 3))) // OpenGL version 3.3
-        .with_gl_profile(glutin::GlProfile::Core); // OpenGL Core profile
-
-    let wb = glutin::window::WindowBuilder::new()
-        .with_inner_size(glutin::dpi::LogicalSize::new(800.0, 600.0)) // LogicalSize respects dpi
-        .with_title("Learn OpenGL in Rust");
-
-    let wc = cb.build_windowed(wb, &el).map_err(|e| e.to_string())?;
-
-    // Built window context is not current so we make it current
-    let current_context;
-    unsafe {
-        current_context = match wc.make_current().ok() {
-            Some(context) => context,
-            None => return Err("Could not make context current.".to_string()),
-        };
-    }
-
-    // -------------------- Load function pointers --------------------
-
-    gl::load_with(|s| current_context.get_proc_address(s));
-
+fn run_indexed(app: Application) -> Result<(), String> {
     // -------------------- Setup Vertex Shader -------------------------
 
     let (shader_program, vao) = unsafe {
@@ -460,14 +442,14 @@ pub fn run_indexed() -> Result<(), String> {
 
     // -------------------- Run Event Loop -------------------------
 
-    el.run(move |event, _, control_flow| {
+    app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {
             Event::LoopDestroyed => return (),
             Event::WindowEvent { event, .. } => match event {
-                WindowEvent::Resized(phys_size) => current_context.resize(phys_size),
+                WindowEvent::Resized(phys_size) => app.context.resize(phys_size),
                 WindowEvent::CloseRequested => {
                     // Sends a LoopDestroyed event and stops the event loop
                     *control_flow = glutin::event_loop::ControlFlow::Exit
@@ -497,41 +479,14 @@ pub fn run_indexed() -> Result<(), String> {
                 gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
                 // gl::BindVertexArray(0); // Not necessary for this simple program
 
-                current_context.swap_buffers().unwrap();
+                app.context.swap_buffers().unwrap();
             },
             _ => (),
         }
     });
 }
 
-pub fn run_exercise_1() -> Result<(), String> {
-    // -------------------- Initialize Context --------------------
-
-    let el = glutin::event_loop::EventLoop::new();
-
-    let cb = glutin::ContextBuilder::new()
-        .with_gl(glutin::GlRequest::Specific(glutin::Api::OpenGl, (3, 3))) // OpenGL version 3.3
-        .with_gl_profile(glutin::GlProfile::Core); // OpenGL Core profile
-
-    let wb = glutin::window::WindowBuilder::new()
-        .with_inner_size(glutin::dpi::LogicalSize::new(800.0, 600.0)) // LogicalSize respects dpi
-        .with_title("Learn OpenGL in Rust");
-
-    let wc = cb.build_windowed(wb, &el).map_err(|e| e.to_string())?;
-
-    // Built window context is not current so we make it current
-    let current_context;
-    unsafe {
-        current_context = match wc.make_current().ok() {
-            Some(context) => context,
-            None => return Err("Could not make context current.".to_string()),
-        };
-    }
-
-    // -------------------- Load function pointers --------------------
-
-    gl::load_with(|s| current_context.get_proc_address(s));
-
+fn run_exercise_1(app: Application) -> Result<(), String> {
     // -------------------- Setup Vertex Shader -------------------------
 
     let (shader_program, vao) = unsafe {
@@ -691,14 +646,14 @@ pub fn run_exercise_1() -> Result<(), String> {
 
     // -------------------- Run Event Loop -------------------------
 
-    el.run(move |event, _, control_flow| {
+    app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {
             Event::LoopDestroyed => return (),
             Event::WindowEvent { event, .. } => match event {
-                WindowEvent::Resized(phys_size) => current_context.resize(phys_size),
+                WindowEvent::Resized(phys_size) => app.context.resize(phys_size),
                 WindowEvent::CloseRequested => {
                     // Sends a LoopDestroyed event and stops the event loop
                     *control_flow = glutin::event_loop::ControlFlow::Exit
@@ -728,41 +683,14 @@ pub fn run_exercise_1() -> Result<(), String> {
                 gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, std::ptr::null());
                 // gl::BindVertexArray(0); // Not necessary for this simple program
 
-                current_context.swap_buffers().unwrap();
+                app.context.swap_buffers().unwrap();
             },
             _ => (),
         }
     });
 }
 
-pub fn run_exercise_2() -> Result<(), String> {
-    // -------------------- Initialize Context --------------------
-
-    let el = glutin::event_loop::EventLoop::new();
-
-    let cb = glutin::ContextBuilder::new()
-        .with_gl(glutin::GlRequest::Specific(glutin::Api::OpenGl, (3, 3))) // OpenGL version 3.3
-        .with_gl_profile(glutin::GlProfile::Core); // OpenGL Core profile
-
-    let wb = glutin::window::WindowBuilder::new()
-        .with_inner_size(glutin::dpi::LogicalSize::new(800.0, 600.0)) // LogicalSize respects dpi
-        .with_title("Learn OpenGL in Rust");
-
-    let wc = cb.build_windowed(wb, &el).map_err(|e| e.to_string())?;
-
-    // Built window context is not current so we make it current
-    let current_context;
-    unsafe {
-        current_context = match wc.make_current().ok() {
-            Some(context) => context,
-            None => return Err("Could not make context current.".to_string()),
-        };
-    }
-
-    // -------------------- Load function pointers --------------------
-
-    gl::load_with(|s| current_context.get_proc_address(s));
-
+fn run_exercise_2(app: Application) -> Result<(), String> {
     // -------------------- Setup Vertex Shader -------------------------
 
     let (shader_program, VAOs) = unsafe {
@@ -952,14 +880,14 @@ pub fn run_exercise_2() -> Result<(), String> {
 
     // -------------------- Run Event Loop -------------------------
 
-    el.run(move |event, _, control_flow| {
+    app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {
             Event::LoopDestroyed => return (),
             Event::WindowEvent { event, .. } => match event {
-                WindowEvent::Resized(phys_size) => current_context.resize(phys_size),
+                WindowEvent::Resized(phys_size) => app.context.resize(phys_size),
                 WindowEvent::CloseRequested => {
                     // Sends a LoopDestroyed event and stops the event loop
                     *control_flow = glutin::event_loop::ControlFlow::Exit
@@ -994,41 +922,14 @@ pub fn run_exercise_2() -> Result<(), String> {
                 gl::DrawElements(gl::TRIANGLES, 3, gl::UNSIGNED_INT, std::ptr::null());
                 gl::BindVertexArray(0); // Not necessary for this simple program
 
-                current_context.swap_buffers().unwrap();
+                app.context.swap_buffers().unwrap();
             },
             _ => (),
         }
     });
 }
 
-pub fn run_exercise_3() -> Result<(), String> {
-    // -------------------- Initialize Context --------------------
-
-    let el = glutin::event_loop::EventLoop::new();
-
-    let cb = glutin::ContextBuilder::new()
-        .with_gl(glutin::GlRequest::Specific(glutin::Api::OpenGl, (3, 3))) // OpenGL version 3.3
-        .with_gl_profile(glutin::GlProfile::Core); // OpenGL Core profile
-
-    let wb = glutin::window::WindowBuilder::new()
-        .with_inner_size(glutin::dpi::LogicalSize::new(800.0, 600.0)) // LogicalSize respects dpi
-        .with_title("Learn OpenGL in Rust");
-
-    let wc = cb.build_windowed(wb, &el).map_err(|e| e.to_string())?;
-
-    // Built window context is not current so we make it current
-    let current_context;
-    unsafe {
-        current_context = match wc.make_current().ok() {
-            Some(context) => context,
-            None => return Err("Could not make context current.".to_string()),
-        };
-    }
-
-    // -------------------- Load function pointers --------------------
-
-    gl::load_with(|s| current_context.get_proc_address(s));
-
+fn run_exercise_3(app: Application) -> Result<(), String> {
     // -------------------- Setup Vertex Shader -------------------------
 
     let (orange_program, yellow_program, VAOs) = unsafe {
@@ -1217,14 +1118,14 @@ pub fn run_exercise_3() -> Result<(), String> {
 
     // -------------------- Run Event Loop -------------------------
 
-    el.run(move |event, _, control_flow| {
+    app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {
             Event::LoopDestroyed => return (),
             Event::WindowEvent { event, .. } => match event {
-                WindowEvent::Resized(phys_size) => current_context.resize(phys_size),
+                WindowEvent::Resized(phys_size) => app.context.resize(phys_size),
                 WindowEvent::CloseRequested => {
                     // Sends a LoopDestroyed event and stops the event loop
                     *control_flow = glutin::event_loop::ControlFlow::Exit
@@ -1258,7 +1159,7 @@ pub fn run_exercise_3() -> Result<(), String> {
                 gl::DrawElements(gl::TRIANGLES, 3, gl::UNSIGNED_INT, std::ptr::null());
                 gl::BindVertexArray(0); // Not necessary for this simple program
 
-                current_context.swap_buffers().unwrap();
+                app.context.swap_buffers().unwrap();
             },
             _ => (),
         }

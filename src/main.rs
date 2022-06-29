@@ -8,6 +8,9 @@ fn main() -> Result<(), String> {
 }
 
 fn choose_program() -> Result<(), String> {
+    // Clears terminal
+    print!("{}[2J", 27 as char);
+
     println!(
         "Choose a program to run:
 

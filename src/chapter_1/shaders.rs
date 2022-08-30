@@ -1,22 +1,5 @@
 use super::Application;
 
-const VERTEX_SHADER_SOURCE: &str = r#"
-    #version 330 core
-    layout (location = 0) in vec3 aPos;
-    void main() {
-       gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-    }
-"#;
-
-const FRAGMENT_SHADER_SOURCE: &str = r#"
-    #version 330 core
-    out vec4 FragColor;
-    uniform vec4 ourColor;
-    void main() {
-       FragColor = ourColor;
-    }
-"#;
-
 pub fn run() -> Result<(), String> {
     // Clears terminal
     print!("{}[2J", 27 as char);
@@ -25,6 +8,7 @@ pub fn run() -> Result<(), String> {
         "Choose a sub program to run:
 
 1. Shaders Uniform 
+2. Shaders Attributes
 
 Type in the number."
     );
@@ -38,12 +22,12 @@ Type in the number."
 
     match input.as_str() {
         "1" => run_shaders_uniform(setup()?)?,
+        "2" => run_shaders_attributes(setup()?)?,
         _ => println!("Invalid input {}.", input),
     }
 
     Ok(())
 }
-
 
 fn setup() -> Result<Application, String> {
     // -------------------- Initialize Context --------------------
@@ -77,6 +61,23 @@ fn setup() -> Result<Application, String> {
         context: current_context,
     })
 }
+
+const VERTEX_SHADER_SOURCE: &str = r#"
+    #version 330 core
+    layout (location = 0) in vec3 aPos;
+    void main() {
+       gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    }
+"#;
+
+const FRAGMENT_SHADER_SOURCE: &str = r#"
+    #version 330 core
+    out vec4 FragColor;
+    uniform vec4 ourColor;
+    void main() {
+       FragColor = ourColor;
+    }
+"#;
 
 fn run_shaders_uniform(app: Application) -> Result<(), String> {
     
@@ -267,4 +268,214 @@ fn run_shaders_uniform(app: Application) -> Result<(), String> {
     });
 }
 
+const VERTEX_SHADER_SOURCE_2: &str = r#"
+    #version 330 core
+    layout (location = 0) in vec3 aPos;
+    layout (location = 1) in vec3 aColor;
+
+    out vec3 ourColor;
+
+    void main() {
+       gl_Position = vec4(aPos, 1.0);
+       ourColor = aColor;
+    }
+"#;
+
+const FRAGMENT_SHADER_SOURCE_2: &str = r#"
+    #version 330 core
+    out vec4 FragColor;
+    in vec3 ourColor;
+
+    void main() {
+       FragColor = vec4(ourColor, 1.0);
+    }
+"#;
+
+fn run_shaders_attributes(app: Application) -> Result<(), String> {
+    let (shader_program, _vao) = unsafe {
+        let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
+        let vtx_src_c_string =
+            std::ffi::CString::new(VERTEX_SHADER_SOURCE_2.as_bytes()).map_err(|e| e.to_string())?;
+        gl::ShaderSource(
+            vertex_shader,
+            1,
+            &vtx_src_c_string.as_ptr(),
+            std::ptr::null(),
+        );
+        gl::CompileShader(vertex_shader);
+
+        let mut success = gl::FALSE as gl::types::GLint;
+        let mut info_log = Vec::with_capacity(512);
+
+        gl::GetShaderiv(vertex_shader, gl::COMPILE_STATUS, &mut success);
+        if success != gl::TRUE as gl::types::GLint {
+            gl::GetShaderInfoLog(
+                vertex_shader,
+                512,
+                std::ptr::null_mut(),
+                info_log.as_mut_ptr() as *mut gl::types::GLchar,
+            );
+            let error = format!(
+                "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{}",
+                std::str::from_utf8(&info_log).unwrap()
+            );
+            return Err(error);
+        }
+
+        // -------------------- Setup Fragment Shader -------------------------
+
+        let fragment_shader = gl::CreateShader(gl::FRAGMENT_SHADER);
+        let frag_src_c_string =
+            std::ffi::CString::new(FRAGMENT_SHADER_SOURCE_2.as_bytes()).map_err(|e| e.to_string())?;
+        gl::ShaderSource(
+            fragment_shader,
+            1,
+            &frag_src_c_string.as_ptr(),
+            std::ptr::null(),
+        );
+        gl::CompileShader(fragment_shader);
+
+        gl::GetShaderiv(fragment_shader, gl::COMPILE_STATUS, &mut success);
+        if success != gl::TRUE as gl::types::GLint {
+            gl::GetShaderInfoLog(
+                fragment_shader,
+                512,
+                std::ptr::null_mut(),
+                info_log.as_mut_ptr() as *mut gl::types::GLchar,
+            );
+            let error = format!(
+                "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{}",
+                std::str::from_utf8(&info_log).unwrap()
+            );
+            return Err(error);
+        }
+
+        // -------------------- Create Shader Program -------------------------
+
+        let shader_program = gl::CreateProgram();
+        gl::AttachShader(shader_program, vertex_shader);
+        gl::AttachShader(shader_program, fragment_shader);
+        gl::LinkProgram(shader_program);
+
+        gl::GetProgramiv(shader_program, gl::LINK_STATUS, &mut success);
+        if success != gl::TRUE as gl::types::GLint {
+            gl::GetProgramInfoLog(
+                shader_program,
+                512,
+                std::ptr::null_mut(),
+                info_log.as_mut_ptr() as *mut gl::types::GLchar,
+            );
+            let error = format!(
+                "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n{}",
+                std::str::from_utf8(&info_log).unwrap()
+            );
+            return Err(error);
+        }
+
+        gl::DeleteShader(vertex_shader);
+        gl::DeleteShader(fragment_shader);
+
+        // -------------------- Setup Vertex Data -------------------------
+
+        let vertices: [f32; 18] = [
+            0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 
+            -0.5, -0.5, 0.0, 0.0, 1.0, 0.0,
+            0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
+        ];
+
+        let (mut vbo, mut vao) = (0, 0);
+
+        gl::GenVertexArrays(1, &mut vao);
+        gl::GenBuffers(1, &mut vbo);
+        gl::BindVertexArray(vao);
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (vertices.len() * std::mem::size_of::<gl::types::GLfloat>()) as gl::types::GLsizeiptr,
+            &vertices[0] as *const f32 as *const std::os::raw::c_void,
+            gl::STATIC_DRAW,
+        );
+
+        // -------------------- Config Vertex Attributes -------------------------
+
+        use std::mem::size_of;
+        use std::os::raw::c_void;
+        use gl::types::{GLfloat, GLsizei};
+
+        let stride = 6 * size_of::<GLfloat>() as GLsizei;
+
+        // position attribute
+        gl::VertexAttribPointer(
+            0,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            stride,
+            std::ptr::null(),
+        );
+        gl::EnableVertexAttribArray(0);
+
+        // color attribute
+        gl::VertexAttribPointer(
+            1,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            stride,
+            (3 * size_of::<GLfloat>()) as *const c_void,
+        );
+        gl::EnableVertexAttribArray(1);
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+
+        // Draw polygons in wireframe, not filled in
+        // gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
+
+        (shader_program, vao)
+    };
+
+    // -------------------- Run Event Loop -------------------------
+
+    app.event_loop.run(move |event, _, control_flow| {
+        *control_flow = glutin::event_loop::ControlFlow::Poll;
+
+        use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
+        match event {
+            Event::LoopDestroyed => return (),
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::Resized(phys_size) => app.context.resize(phys_size),
+                WindowEvent::CloseRequested => {
+                    *control_flow = glutin::event_loop::ControlFlow::Exit
+                }
+                _ => (),
+            },
+
+            Event::DeviceEvent { event, .. } => match event {
+                DeviceEvent::Key(key_input) => match key_input.virtual_keycode {
+                    Some(VirtualKeyCode::Escape) => {
+                        *control_flow = glutin::event_loop::ControlFlow::Exit
+                    }
+                    Some(_) => (),
+                    None => (),
+                },
+                _ => (),
+            },
+
+            Event::RedrawRequested(_) => unsafe {
+                gl::ClearColor(0.2, 0.3, 0.3, 1.0);
+                gl::Clear(gl::COLOR_BUFFER_BIT);
+
+                // Draw the triangle
+                gl::UseProgram(shader_program);
+                //gl::BindVertexArray(vao); // Not necessary for this simple program
+                gl::DrawArrays(gl::TRIANGLES, 0, 3);
+                // gl::BindVertexArray(0); // Not necessary for this simple program
+
+                app.context.swap_buffers().unwrap();
+            },
+            _ => (),
+        }
+    });
+}
 

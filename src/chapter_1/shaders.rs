@@ -1,4 +1,5 @@
 use super::Application;
+use crate::shader::Shader;
 
 pub fn run() -> Result<(), String> {
     // Clears terminal
@@ -9,6 +10,7 @@ pub fn run() -> Result<(), String> {
 
 1. Shaders Uniform 
 2. Shaders Attributes
+3. Reading from File
 
 Type in the number."
     );
@@ -23,6 +25,7 @@ Type in the number."
     match input.as_str() {
         "1" => run_shaders_uniform(setup()?)?,
         "2" => run_shaders_attributes(setup()?)?,
+        "3" => run_shaders_from_file(setup()?)?,
         _ => println!("Invalid input {}.", input),
     }
 
@@ -471,6 +474,116 @@ fn run_shaders_attributes(app: Application) -> Result<(), String> {
                 //gl::BindVertexArray(vao); // Not necessary for this simple program
                 gl::DrawArrays(gl::TRIANGLES, 0, 3);
                 // gl::BindVertexArray(0); // Not necessary for this simple program
+
+                app.context.swap_buffers().unwrap();
+            },
+            _ => (),
+        }
+    });
+}
+
+fn run_shaders_from_file(app: Application) -> Result<(), String> {
+
+    let (shader, _vao) = unsafe {
+
+        let shader = Shader::new("./shaders/chapter_1/3_3_shader.vs".into(), "./shaders/chapter_1/3_3_shader.fs".into())?;
+        
+        // -------------------- Setup Vertex Data -------------------------
+
+        let vertices: [f32; 18] = [
+            0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 
+            -0.5, -0.5, 0.0, 0.0, 1.0, 0.0,
+            0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
+        ];
+
+        let (mut vbo, mut vao) = (0, 0);
+
+        gl::GenVertexArrays(1, &mut vao);
+        gl::GenBuffers(1, &mut vbo);
+        gl::BindVertexArray(vao);
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (vertices.len() * std::mem::size_of::<gl::types::GLfloat>()) as gl::types::GLsizeiptr,
+            &vertices[0] as *const f32 as *const std::os::raw::c_void,
+            gl::STATIC_DRAW,
+        );
+
+        // -------------------- Config Vertex Attributes -------------------------
+
+        use std::mem::size_of;
+        use std::os::raw::c_void;
+        use gl::types::{GLfloat, GLsizei};
+
+        let stride = 6 * size_of::<GLfloat>() as GLsizei;
+
+        // position attribute
+        gl::VertexAttribPointer(
+            0,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            stride,
+            std::ptr::null(),
+        );
+        gl::EnableVertexAttribArray(0);
+
+        // color attribute
+        gl::VertexAttribPointer(
+            1,
+            3,
+            gl::FLOAT,
+            gl::FALSE,
+            stride,
+            (3 * size_of::<GLfloat>()) as *const c_void,
+        );
+        gl::EnableVertexAttribArray(1);
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+
+        // Draw polygons in wireframe, not filled in
+        // gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
+
+        (shader, vao)
+    };
+
+    // -------------------- Run Event Loop -------------------------
+
+    app.event_loop.run(move |event, _, control_flow| {
+        *control_flow = glutin::event_loop::ControlFlow::Poll;
+
+        use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
+        match event {
+            Event::LoopDestroyed => return (),
+            Event::WindowEvent { event, .. } => match event {
+                WindowEvent::Resized(phys_size) => app.context.resize(phys_size),
+                WindowEvent::CloseRequested => {
+                    *control_flow = glutin::event_loop::ControlFlow::Exit
+                }
+                _ => (),
+            },
+
+            Event::DeviceEvent { event, .. } => match event {
+                DeviceEvent::Key(key_input) => match key_input.virtual_keycode {
+                    Some(VirtualKeyCode::Escape) => {
+                        *control_flow = glutin::event_loop::ControlFlow::Exit
+                    }
+                    Some(_) => (),
+                    None => (),
+                },
+                _ => (),
+            },
+
+            Event::RedrawRequested(_) => unsafe {
+                gl::ClearColor(0.2, 0.3, 0.3, 1.0);
+                gl::Clear(gl::COLOR_BUFFER_BIT);
+
+                // Draw the triangle
+                shader.use_program();
+                //gl::BindVertexArray(vao); // Not necessary for this simple program
+                gl::DrawArrays(gl::TRIANGLES, 0, 3);
+                //gl::BindVertexArray(0); // Not necessary for this simple program
 
                 app.context.swap_buffers().unwrap();
             },

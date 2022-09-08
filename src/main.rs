@@ -1,4 +1,5 @@
 mod chapter_1;
+mod shader;
 use std::io;
 
 fn main() -> Result<(), String> {

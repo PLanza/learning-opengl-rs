@@ -83,7 +83,6 @@ const FRAGMENT_SHADER_SOURCE: &str = r#"
 "#;
 
 fn run_shaders_uniform(app: Application) -> Result<(), String> {
-    
     let (shader_program, _vao) = unsafe {
         let vertex_shader = gl::CreateShader(gl::VERTEX_SHADER);
         let vtx_src_c_string =
@@ -218,12 +217,12 @@ fn run_shaders_uniform(app: Application) -> Result<(), String> {
         // Change the green value every iteration of the loop
         let green_value = (start_time.elapsed().as_secs_f32().sin() / 2.0) + 0.5;
         // Need to convert "ourColor"into a CString
-        let uniform_name = 
-            std::ffi::CString::new("ourColor").unwrap();
-        
+        let uniform_name = std::ffi::CString::new("ourColor").unwrap();
+
         unsafe {
             // Get the uniform vertex location
-            let vertex_color_location = gl::GetUniformLocation(shader_program, uniform_name.as_ptr());
+            let vertex_color_location =
+                gl::GetUniformLocation(shader_program, uniform_name.as_ptr());
             // Make sure the shader program is loaded
             gl::UseProgram(shader_program);
             // Assign to the uniform vertex
@@ -328,8 +327,8 @@ fn run_shaders_attributes(app: Application) -> Result<(), String> {
         // -------------------- Setup Fragment Shader -------------------------
 
         let fragment_shader = gl::CreateShader(gl::FRAGMENT_SHADER);
-        let frag_src_c_string =
-            std::ffi::CString::new(FRAGMENT_SHADER_SOURCE_2.as_bytes()).map_err(|e| e.to_string())?;
+        let frag_src_c_string = std::ffi::CString::new(FRAGMENT_SHADER_SOURCE_2.as_bytes())
+            .map_err(|e| e.to_string())?;
         gl::ShaderSource(
             fragment_shader,
             1,
@@ -381,9 +380,8 @@ fn run_shaders_attributes(app: Application) -> Result<(), String> {
         // -------------------- Setup Vertex Data -------------------------
 
         let vertices: [f32; 18] = [
-            0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 
-            -0.5, -0.5, 0.0, 0.0, 1.0, 0.0,
-            0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
+            0.5, -0.5, 0.0, 1.0, 0.0, 0.0, -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
+            1.0,
         ];
 
         let (mut vbo, mut vao) = (0, 0);
@@ -402,21 +400,14 @@ fn run_shaders_attributes(app: Application) -> Result<(), String> {
 
         // -------------------- Config Vertex Attributes -------------------------
 
+        use gl::types::{GLfloat, GLsizei};
         use std::mem::size_of;
         use std::os::raw::c_void;
-        use gl::types::{GLfloat, GLsizei};
 
         let stride = 6 * size_of::<GLfloat>() as GLsizei;
 
         // position attribute
-        gl::VertexAttribPointer(
-            0,
-            3,
-            gl::FLOAT,
-            gl::FALSE,
-            stride,
-            std::ptr::null(),
-        );
+        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, std::ptr::null());
         gl::EnableVertexAttribArray(0);
 
         // color attribute
@@ -483,17 +474,17 @@ fn run_shaders_attributes(app: Application) -> Result<(), String> {
 }
 
 fn run_shaders_from_file(app: Application) -> Result<(), String> {
-
     let (shader, _vao) = unsafe {
+        let shader = Shader::new(
+            "./shaders/chapter_1/3_3_shader.vs".into(),
+            "./shaders/chapter_1/3_3_shader.fs".into(),
+        )?;
 
-        let shader = Shader::new("./shaders/chapter_1/3_3_shader.vs".into(), "./shaders/chapter_1/3_3_shader.fs".into())?;
-        
         // -------------------- Setup Vertex Data -------------------------
 
         let vertices: [f32; 18] = [
-            0.5, -0.5, 0.0, 1.0, 0.0, 0.0, 
-            -0.5, -0.5, 0.0, 0.0, 1.0, 0.0,
-            0.0, 0.5, 0.0, 0.0, 0.0, 1.0,
+            0.5, -0.5, 0.0, 1.0, 0.0, 0.0, -0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0,
+            1.0,
         ];
 
         let (mut vbo, mut vao) = (0, 0);
@@ -512,21 +503,14 @@ fn run_shaders_from_file(app: Application) -> Result<(), String> {
 
         // -------------------- Config Vertex Attributes -------------------------
 
+        use gl::types::{GLfloat, GLsizei};
         use std::mem::size_of;
         use std::os::raw::c_void;
-        use gl::types::{GLfloat, GLsizei};
 
         let stride = 6 * size_of::<GLfloat>() as GLsizei;
 
         // position attribute
-        gl::VertexAttribPointer(
-            0,
-            3,
-            gl::FLOAT,
-            gl::FALSE,
-            stride,
-            std::ptr::null(),
-        );
+        gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, stride, std::ptr::null());
         gl::EnableVertexAttribArray(0);
 
         // color attribute
@@ -591,4 +575,3 @@ fn run_shaders_from_file(app: Application) -> Result<(), String> {
         }
     });
 }
-

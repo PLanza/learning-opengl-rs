@@ -17,6 +17,7 @@ fn choose_program() -> Result<(), String> {
 Chapter 1: A) Hello Window
            B) Hello Triangle
            C) Shaders
+           D) Textures
 
 Type in the chapter number, along with the program letter (e.g. 1A)."
     );
@@ -32,6 +33,7 @@ Type in the chapter number, along with the program letter (e.g. 1A)."
         "1A" => chapter_1::hello_window::run()?,
         "1B" => chapter_1::hello_triangle::run()?,
         "1C" => chapter_1::shaders::run()?,
+        "1D" => chapter_1::textures::run()?,
         _ => println!("Invalid input {}.", input),
     }
 

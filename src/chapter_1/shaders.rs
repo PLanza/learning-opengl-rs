@@ -744,17 +744,15 @@ fn run_shaders_offset(app: Application) -> Result<(), String> {
         (shader, vao)
     };
 
-    
     // -------------------- Run Event Loop -------------------------
 
     app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
         // Set offset value
         let uniform_name = std::ffi::CString::new("offset").unwrap();
-        unsafe { 
+        unsafe {
             shader.set_float(&uniform_name, 0.5);
         }
-
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {
@@ -844,7 +842,6 @@ fn run_shaders_position(app: Application) -> Result<(), String> {
         (shader, vao)
     };
 
-    
     // -------------------- Run Event Loop -------------------------
 
     app.event_loop.run(move |event, _, control_flow| {

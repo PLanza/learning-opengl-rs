@@ -8,7 +8,6 @@ impl Shader {
     pub fn new(vertex_path: String, fragment_path: String) -> Result<Shader, String> {
         let vertex_code =
             std::fs::read_to_string(Path::new(&vertex_path)).map_err(|e| e.to_string())?;
-        println!("{}", vertex_code);
         let fragment_code =
             std::fs::read_to_string(Path::new(&fragment_path)).map_err(|e| e.to_string())?;
 

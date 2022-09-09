@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 glutin = "0.28.0"
 gl = "0.10.0"
+image = "0.24.3"

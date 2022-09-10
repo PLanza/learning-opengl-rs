@@ -328,7 +328,7 @@ fn run_texture_units(app: Application) -> Result<(), String> {
 
         drop(img_data);
 
-        // Texture 2 
+        // Texture 2
         gl::GenTextures(1, &mut texture2);
         gl::BindTexture(gl::TEXTURE_2D, texture2);
 
@@ -358,7 +358,7 @@ fn run_texture_units(app: Application) -> Result<(), String> {
             0,
             gl::RGBA,
             gl::UNSIGNED_BYTE,
-            img_data.as_ptr() as *const c_void
+            img_data.as_ptr() as *const c_void,
         );
         gl::GenerateMipmap(gl::TEXTURE_2D);
 
@@ -543,7 +543,7 @@ fn run_texture_wrapping(app: Application) -> Result<(), String> {
 
         drop(img_data);
 
-        // Texture 2 
+        // Texture 2
         gl::GenTextures(1, &mut texture2);
         gl::BindTexture(gl::TEXTURE_2D, texture2);
 
@@ -573,7 +573,7 @@ fn run_texture_wrapping(app: Application) -> Result<(), String> {
             0,
             gl::RGBA,
             gl::UNSIGNED_BYTE,
-            img_data.as_ptr() as *const c_void
+            img_data.as_ptr() as *const c_void,
         );
         gl::GenerateMipmap(gl::TEXTURE_2D);
 
@@ -926,7 +926,7 @@ fn run_variable_opacity(app: Application) -> Result<(), String> {
 
         drop(img_data);
 
-        // Texture 2 
+        // Texture 2
         gl::GenTextures(1, &mut texture2);
         gl::BindTexture(gl::TEXTURE_2D, texture2);
 
@@ -956,7 +956,7 @@ fn run_variable_opacity(app: Application) -> Result<(), String> {
             0,
             gl::RGBA,
             gl::UNSIGNED_BYTE,
-            img_data.as_ptr() as *const c_void
+            img_data.as_ptr() as *const c_void,
         );
         gl::GenerateMipmap(gl::TEXTURE_2D);
 
@@ -972,10 +972,10 @@ fn run_variable_opacity(app: Application) -> Result<(), String> {
     }
 
     // -------------------- Run Event Loop -------------------------
-    
+
     let mut mix_value: f32 = 0.5;
     let delta_mix: f32 = 0.05;
-    unsafe { 
+    unsafe {
         shader.set_float("mixValue", mix_value);
     }
 
@@ -1000,7 +1000,7 @@ fn run_variable_opacity(app: Application) -> Result<(), String> {
                     }
                     Some(VirtualKeyCode::Up) => {
                         mix_value = (mix_value + delta_mix).clamp(0.0, 1.0);
-                        unsafe { 
+                        unsafe {
                             shader.set_float("mixValue", mix_value);
                         }
                         app.context.window().request_redraw();
@@ -1008,7 +1008,7 @@ fn run_variable_opacity(app: Application) -> Result<(), String> {
                     }
                     Some(VirtualKeyCode::Down) => {
                         mix_value = (mix_value - delta_mix).clamp(0.0, 1.0);
-                        unsafe { 
+                        unsafe {
                             shader.set_float("mixValue", mix_value);
                         }
                         app.context.window().request_redraw();

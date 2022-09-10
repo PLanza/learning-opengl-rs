@@ -742,7 +742,7 @@ fn run_shaders_offset(app: Application) -> Result<(), String> {
         // gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
 
         (shader, vao)
-    };        
+    };
 
     // Set offset value
     unsafe {
@@ -754,7 +754,6 @@ fn run_shaders_offset(app: Application) -> Result<(), String> {
 
     app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
-
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {

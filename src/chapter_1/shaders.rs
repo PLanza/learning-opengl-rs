@@ -482,8 +482,8 @@ fn run_shaders_attributes(app: Application) -> Result<(), String> {
 fn run_shaders_from_file(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_3.vs".into(),
-            "./shaders/chapter_1/3_3.fs".into(),
+            "./shaders/chapter_1/3_3.vert".into(),
+            "./shaders/chapter_1/3_3.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------
@@ -585,8 +585,8 @@ fn run_shaders_from_file(app: Application) -> Result<(), String> {
 fn run_shaders_upside_down(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_e1.vs".into(),
-            "./shaders/chapter_1/3_e1.fs".into(),
+            "./shaders/chapter_1/3_e1.vert".into(),
+            "./shaders/chapter_1/3_e1.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------
@@ -688,8 +688,8 @@ fn run_shaders_upside_down(app: Application) -> Result<(), String> {
 fn run_shaders_offset(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_e2.vs".into(),
-            "./shaders/chapter_1/3_e2.fs".into(),
+            "./shaders/chapter_1/3_e2.vert".into(),
+            "./shaders/chapter_1/3_e2.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------
@@ -742,17 +742,19 @@ fn run_shaders_offset(app: Application) -> Result<(), String> {
         // gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
 
         (shader, vao)
-    };
+    };        
+
+    // Set offset value
+    unsafe {
+        shader.use_program();
+        shader.set_float("offset", 0.5);
+    }
 
     // -------------------- Run Event Loop -------------------------
 
     app.event_loop.run(move |event, _, control_flow| {
         *control_flow = glutin::event_loop::ControlFlow::Poll;
-        // Set offset value
-        let uniform_name = std::ffi::CString::new("offset").unwrap();
-        unsafe {
-            shader.set_float(&uniform_name, 0.5);
-        }
+
 
         use glutin::event::{DeviceEvent, Event, VirtualKeyCode, WindowEvent};
         match event {
@@ -796,8 +798,8 @@ fn run_shaders_offset(app: Application) -> Result<(), String> {
 fn run_shaders_position(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_e3.vs".into(),
-            "./shaders/chapter_1/3_e3.fs".into(),
+            "./shaders/chapter_1/3_e3.vert".into(),
+            "./shaders/chapter_1/3_e3.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------

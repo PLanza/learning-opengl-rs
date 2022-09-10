@@ -1,7 +1,7 @@
-use std::{ffi::CStr, path::Path};
+use std::path::Path;
 
 pub struct Shader {
-    program_id: u32,
+    pub program_id: u32,
 }
 
 impl Shader {
@@ -101,25 +101,29 @@ impl Shader {
 
         Ok(Shader { program_id })
     }
+
     pub unsafe fn use_program(&self) {
         gl::UseProgram(self.program_id);
     }
 
-    pub unsafe fn set_bool(&self, name: &CStr, value: bool) {
+    pub unsafe fn set_bool(&self, name: &str, value: bool) {
+        let name = std::ffi::CString::new(name).unwrap();
         gl::Uniform1i(
             gl::GetUniformLocation(self.program_id, name.as_ptr()),
             value as i32,
         );
     }
 
-    pub unsafe fn set_int(&self, name: &CStr, value: i32) {
+    pub unsafe fn set_int(&self, name: &str, value: i32) {
+        let name = std::ffi::CString::new(name).unwrap();
         gl::Uniform1i(
             gl::GetUniformLocation(self.program_id, name.as_ptr()),
             value,
         );
     }
 
-    pub unsafe fn set_float(&self, name: &CStr, value: f32) {
+    pub unsafe fn set_float(&self, name: &str, value: f32) {
+        let name = std::ffi::CString::new(name).unwrap();
         gl::Uniform1f(
             gl::GetUniformLocation(self.program_id, name.as_ptr()),
             value,

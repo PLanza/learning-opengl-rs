@@ -482,8 +482,8 @@ fn run_shaders_attributes(app: Application) -> Result<(), String> {
 fn run_shaders_from_file(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_3.vert".into(),
-            "./shaders/chapter_1/3_3.frag".into(),
+            "./shaders/chapter_1/section_3/3_3.vert".into(),
+            "./shaders/chapter_1/section_3/3_3.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------
@@ -585,8 +585,8 @@ fn run_shaders_from_file(app: Application) -> Result<(), String> {
 fn run_shaders_upside_down(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_e1.vert".into(),
-            "./shaders/chapter_1/3_e1.frag".into(),
+            "./shaders/chapter_1/section_3/3_e1.vert".into(),
+            "./shaders/chapter_1/section_3/3_e1.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------
@@ -688,8 +688,8 @@ fn run_shaders_upside_down(app: Application) -> Result<(), String> {
 fn run_shaders_offset(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_e2.vert".into(),
-            "./shaders/chapter_1/3_e2.frag".into(),
+            "./shaders/chapter_1/section_3/3_e2.vert".into(),
+            "./shaders/chapter_1/section_3/3_e2.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------
@@ -798,8 +798,8 @@ fn run_shaders_offset(app: Application) -> Result<(), String> {
 fn run_shaders_position(app: Application) -> Result<(), String> {
     let (shader, _vao) = unsafe {
         let shader = Shader::new(
-            "./shaders/chapter_1/3_e3.vert".into(),
-            "./shaders/chapter_1/3_e3.frag".into(),
+            "./shaders/chapter_1/section_3/3_e3.vert".into(),
+            "./shaders/chapter_1/section_3/3_e3.frag".into(),
         )?;
 
         // -------------------- Setup Vertex Data -------------------------
